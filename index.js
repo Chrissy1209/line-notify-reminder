@@ -26,11 +26,11 @@ const sendNotification = async (message) => {
   }
 };
 
-// 定時任務，每周一到五的上午 8:30 運行
-cron.schedule('20 10 * * 1-5', () => {
-    sendLineNotify('Hello, This is a message from Render!');
+// 定時任務，每周一到五的上午 10:30 運行
+cron.schedule('30 10 * * 1-5', () => {
+  sendNotification('Hello, This is a message from Render!');
   }, {
     timezone: 'Asia/Taipei'  
   });
 
-console.log('Cron job scheduled.'); // 在脚本启动时确认计划任务已设置
+console.log('Cron job scheduled.');
