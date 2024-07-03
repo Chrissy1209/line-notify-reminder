@@ -1,34 +1,97 @@
 // autoNotify/index.js
-const axios = require('axios');
-const cron = require('node-cron');
-require('dotenv').config();
+const axios = require("axios");
+const cron = require("node-cron");
+require("dotenv").config();
 
 const LINE_NOTIFY_TOKEN = process.env.LINE_NOTIFY_TOKEN;
-
-const url = 'https://notify-api.line.me/api/notify';
+const notifyUrl = "https://notify-api.line.me/api/notify";
 
 const sendNotification = async (message) => {
   try {
     const response = await axios.post(
-      url,
+      notifyUrl,
       `message=${encodeURIComponent(message)}`,
       {
         headers: {
-          'Authorization': `Bearer ${LINE_NOTIFY_TOKEN}`,
-          'Content-Type': 'application/x-www-form-urlencoded',
+          Authorization: `Bearer ${LINE_NOTIFY_TOKEN}`,
+          "Content-Type": "application/x-www-form-urlencoded",
         },
       }
     );
-    console.log('Notification sent successfully:', response.data);
+    console.log("Notification sent successfully:", response.data);
   } catch (error) {
-    console.error('Error sending notification:', error.message);
+    console.error("Error sending notification:", error.message);
   }
 };
-// 定時任務，每周一到五的上午 12:30 運行
-cron.schedule('20 12 * * 1-5', () => {
-  sendNotification('Hello, This is a message from Render!');
-  }, {
-    timezone: 'Asia/Taipei'  
-  });
 
-console.log('Cron job scheduled.');
+//---
+
+const notifyMessage = (data) => {
+  let message = "☀️ 今日氣象預報\n\n";
+
+  data.location.forEach((loc) => {
+    const weatherElements = loc.weatherElement;
+    message += `📌${loc.locationName}\n`;
+
+    const Wx = weatherElements.find((e) => e.elementName === "Wx").time;
+    const PoP = weatherElements.find((e) => e.elementName === "PoP").time;
+    const MinT = weatherElements.find((e) => e.elementName === "MinT").time;
+    const MaxT = weatherElements.find((e) => e.elementName === "MaxT").time;
+    const CI = weatherElements.find((e) => e.elementName === "CI").time;
+
+    for (let i = 0; i < Wx.length; i++) {
+      message += `${Wx[i].startTime.slice(11, 16)}\n`;
+      message += `🌤 ${Wx[i].parameter.parameterName}\n`;
+      message += `🌡 最低溫度: ${MinT[i].parameter.parameterName}°C\n`;
+      message += `🌡 最高溫度: ${MaxT[i].parameter.parameterName}°C\n`;
+      message += `🌂 降雨機率: ${PoP[i].parameter.parameterName}%\n`;
+      message += `🌀 ${CI[i].parameter.parameterName}\n`;
+    }
+  });
+  return message;
+};
+
+const WEATHER_AUTHORIZATION = process.env.WEATHER_AUTHORIZATION;
+const taipei = "%E8%87%BA%E5%8C%97%E5%B8%82";
+const taoyuan = "%E6%A1%83%E5%9C%92%E5%B8%82";
+
+const sendWeatherForecast = async (locationName) => {
+  const forecastUrl = `https://opendata.cwa.gov.tw/api/v1/rest/datastore/F-C0032-001?Authorization=${WEATHER_AUTHORIZATION}&format=JSON&locationName=${locationName ==='taipei' ? taipei : taoyuan}`;
+  let myMessage = "";
+  console.log(forecastUrl);
+  try {
+    const response = await axios.get(forecastUrl, {
+      headers: {
+        accept: "application/json",
+      },
+    });
+
+    myMessage = notifyMessage(response.data.records);
+    sendNotification(myMessage);
+  } catch (error) {
+    console.error("Error sending notification:", error.message);
+  }
+};
+sendWeatherForecast('taoyuan')
+
+//--- 
+
+cron.schedule(
+  "40 12 * * 1-5",
+  () => {
+    sendWeatherForecast('taipei',);
+  },
+  {
+    timezone: "Asia/Taipei",
+  }
+);
+
+cron.schedule(
+  "30 08 * * 6-7",
+  () => {
+    sendWeatherForecast('taoyuan');
+  },
+  {
+    timezone: "Asia/Taipei",
+  }
+);
