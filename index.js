@@ -72,14 +72,13 @@ const sendWeatherForecast = async (locationName) => {
     console.error("Error sending notification:", error.message);
   }
 };
-sendWeatherForecast('taoyuan')
 
 //--- 
 
 cron.schedule(
-  "40 12 * * 1-5",
+  "50 12 * * 1-5",
   () => {
-    sendWeatherForecast('taipei',);
+    sendWeatherForecast('taipei');
   },
   {
     timezone: "Asia/Taipei",
