@@ -1,4 +1,5 @@
 // autoNotify/index.js
+const http = require('http');
 const axios = require("axios");
 const cron = require("node-cron");
 require("dotenv").config();
@@ -13,7 +14,7 @@ const sendNotification = async (message) => {
       `message=${encodeURIComponent(message)}`,
       {
         headers: {
-          Authorization: `Bearer ${LINE_NOTIFY_TOKEN}`,
+          "Authorization": `Bearer ${LINE_NOTIFY_TOKEN}`,
           "Content-Type": "application/x-www-form-urlencoded",
         },
       }
@@ -58,7 +59,7 @@ const taoyuan = "%E6%A1%83%E5%9C%92%E5%B8%82";
 const sendWeatherForecast = async (locationName) => {
   const forecastUrl = `https://opendata.cwa.gov.tw/api/v1/rest/datastore/F-C0032-001?Authorization=${WEATHER_AUTHORIZATION}&format=JSON&locationName=${locationName ==='taipei' ? taipei : taoyuan}`;
   let myMessage = "";
-  console.log(forecastUrl);
+
   try {
     const response = await axios.get(forecastUrl, {
       headers: {
@@ -76,7 +77,7 @@ const sendWeatherForecast = async (locationName) => {
 //--- 
 
 cron.schedule(
-  "50 12 * * 1-5",
+  "30 08 * * 1-5",
   () => {
     sendWeatherForecast('taipei');
   },
@@ -94,3 +95,16 @@ cron.schedule(
     timezone: "Asia/Taipei",
   }
 );
+
+//---
+
+const port = process.env.PORT || 3000;
+const server = http.createServer((req, res) => {
+  res.statusCode = 200;
+  res.setHeader('Content-Type', 'text/plain');
+  res.end('Hello, this is a simple web service to keep Render happy!');
+});
+
+server.listen(port, () => {
+  console.log(`Server running at port ${port}`);
+});
