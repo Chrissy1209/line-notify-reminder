@@ -77,9 +77,10 @@ const sendWeatherForecast = async (locationName) => {
 //--- 
 
 cron.schedule(
-  "30 08 * * 1-5",
+  "30 09 * * 1-5",
   () => {
     sendWeatherForecast('taipei');
+    console.log('cron\' running taipei');
   },
   {
     timezone: "Asia/Taipei",
@@ -90,6 +91,7 @@ cron.schedule(
   "30 08 * * 6-7",
   () => {
     sendWeatherForecast('taoyuan');
+    console.log('cron\' running taoyuan');
   },
   {
     timezone: "Asia/Taipei",
