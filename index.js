@@ -22,6 +22,7 @@ const sendNotification = async (message) => {
     console.log("Notification sent successfully:", response.data);
   } catch (error) {
     console.error("Error sending notification:", error.message);
+    throw error;
   }
 };
 
@@ -68,16 +69,17 @@ const sendWeatherForecast = async (locationName) => {
     });
 
     myMessage = notifyMessage(response.data.records);
-    sendNotification(myMessage);
+    await sendNotification(myMessage);
   } catch (error) {
     console.error("Error sending notification:", error.message);
+    throw error;
   }
 };
 
 //--- 
 
 cron.schedule(
-  "*/5 * * * *",
+  "30 08 * * 1-5",
   () => {
     console.log("Running task for Taipei");
     sendWeatherForecast('taipei').catch(err => console.error("Error in Taipei task:", err));
@@ -88,7 +90,7 @@ cron.schedule(
 );
 
 cron.schedule(
-  "30 08 * * 6-7",
+  "30 09 * * 6-7",
   () => {
     console.log("Running task for Taoyuan");
     sendWeatherForecast('taoyuan').catch(err => console.error("Error in Taoyuan task:", err));
