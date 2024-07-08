@@ -77,10 +77,10 @@ const sendWeatherForecast = async (locationName) => {
 //--- 
 
 cron.schedule(
-  "30 09 * * 1-5",
+  "*/5 * * * *",
   () => {
-    sendWeatherForecast('taipei');
-    console.log('cron\' running taipei');
+    console.log("Running task for Taipei");
+    sendWeatherForecast('taipei').catch(err => console.error("Error in Taipei task:", err));
   },
   {
     timezone: "Asia/Taipei",
@@ -90,8 +90,8 @@ cron.schedule(
 cron.schedule(
   "30 08 * * 6-7",
   () => {
-    sendWeatherForecast('taoyuan');
-    console.log('cron\' running taoyuan');
+    console.log("Running task for Taoyuan");
+    sendWeatherForecast('taoyuan').catch(err => console.error("Error in Taoyuan task:", err));
   },
   {
     timezone: "Asia/Taipei",
